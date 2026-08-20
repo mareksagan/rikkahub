@@ -658,6 +658,12 @@
   <string name="setting_asr_configure_step_timestamp_desc">Return word-level timestamps in delta events. Disabled by default to save tokens (rikkahub does not consume them yet)</string>
   <string name="setting_asr_configure_step_hotwords">Hotwords</string>
   <string name="setting_asr_configure_step_hotwords_desc">Comma-separated list of hotwords to boost recognition accuracy for proper nouns / domain terms</string>
+  <string name="setting_asr_configure_whisper_api_key_desc">OpenAI API key for Whisper transcription</string>
+  <string name="setting_asr_configure_whisper_base_url_desc">OpenAI-compatible base URL for Whisper API</string>
+  <string name="setting_asr_configure_whisper_model_desc">Whisper model name, e.g. whisper-1, gpt-4o-mini-transcribe, gpt-4o-transcribe</string>
+  <string name="setting_asr_configure_whisper_language_desc">Optional ISO language code, e.g. en, zh, ja. Leave empty for auto-detect</string>
+  <string name="setting_asr_configure_whisper_sample_rate_desc">PCM recording sample rate in Hz, 16000 is recommended</string>
+  <string name="setting_asr_configure_whisper_segment_desc">Auto-flush buffered audio every N seconds during recording. 0 disables auto-segmentation (single request on stop)</string>
   <string name="setting_asr_page_add_provider">Add ASR Provider</string>
   <string name="setting_asr_page_default_name">ASR</string>
   <string name="setting_asr_page_edit_provider">Edit ASR Provider</string>

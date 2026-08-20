@@ -20,6 +20,7 @@ import me.rerere.asr.providers.MiMoASRController
 import me.rerere.asr.providers.OpenAIRealtimeASRController
 import me.rerere.asr.providers.StepASRController
 import me.rerere.asr.providers.VolcengineASRController
+import me.rerere.asr.providers.WhisperASRController
 import me.rerere.rikkahub.data.datastore.SettingsStore
 import me.rerere.rikkahub.data.datastore.getSelectedASRProvider
 import okhttp3.OkHttpClient
@@ -129,6 +130,11 @@ private class CustomAsrStateImpl(
             is ASRProviderSetting.Step -> {
                 if (provider.apiKey.isBlank()) return null
                 StepASRController(context, httpClient, provider)
+            }
+
+            is ASRProviderSetting.Whisper -> {
+                if (provider.apiKey.isBlank()) return null
+                WhisperASRController(context, httpClient, provider)
             }
         }
     }

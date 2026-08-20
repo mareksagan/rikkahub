@@ -169,6 +169,38 @@ sealed class ASRProviderSetting {
         }
     }
 
+    /**
+     * OpenAI Whisper ASR (whisper-1 / gpt-4o-mini-transcribe / gpt-4o-transcribe)。
+     *
+     * 使用标准 OpenAI [POST /v1/audio/transcriptions] 接口。
+     * 录音期间按 [segmentDurationSec] 分段, 每段转 WAV 后以 multipart/form-data
+     * 上传, 返回 JSON 中的 text 字段即为识别结果。
+     *
+     * 兼容所有 OpenAI 兼容 API (OpenAI, OVH AI, 本地服务等)。
+     */
+    @Serializable
+    @SerialName("whisper")
+    data class Whisper(
+        override val id: Uuid = Uuid.random(),
+        override val name: String = "Whisper ASR",
+        val apiKey: String = "",
+        val baseUrl: String = "https://api.openai.com/v1",
+        val model: String = "whisper-1",
+        val language: String = "",
+        val sampleRate: Int = 16000,
+        val segmentDurationSec: Int = 30,
+    ) : ASRProviderSetting() {
+        override fun copyProvider(
+            id: Uuid,
+            name: String,
+        ): ASRProviderSetting {
+            return this.copy(
+                id = id,
+                name = name,
+            )
+        }
+    }
+
     companion object {
         val Types by lazy {
             listOf(
@@ -177,6 +209,7 @@ sealed class ASRProviderSetting {
                 Volcengine::class,
                 MiMo::class,
                 Step::class,
+                Whisper::class,
             )
         }
     }

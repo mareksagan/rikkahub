@@ -37,6 +37,7 @@ fun ASRProviderConfigure(
                     is ASRProviderSetting.Volcengine -> "Volcengine"
                     is ASRProviderSetting.MiMo -> "MiMo"
                     is ASRProviderSetting.Step -> "Step"
+                    is ASRProviderSetting.Whisper -> "Whisper"
                 },
                 onValueChange = {},
                 readOnly = true,
@@ -62,6 +63,7 @@ fun ASRProviderConfigure(
             is ASRProviderSetting.Volcengine -> VolcengineASRConfiguration(setting, onValueChange)
             is ASRProviderSetting.MiMo -> MiMoASRConfiguration(setting, onValueChange)
             is ASRProviderSetting.Step -> StepASRConfiguration(setting, onValueChange)
+            is ASRProviderSetting.Whisper -> WhisperASRConfiguration(setting, onValueChange)
         }
     }
 }
@@ -527,6 +529,92 @@ private fun StepASRConfiguration(
             },
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text("热词1, 热词2, 热词3") }
+        )
+    }
+}
+
+@Composable
+private fun WhisperASRConfiguration(
+    setting: ASRProviderSetting.Whisper,
+    onValueChange: (ASRProviderSetting) -> Unit
+) {
+    FormItem(
+        label = { Text(stringResource(R.string.setting_asr_configure_api_key)) },
+        description = { Text(stringResource(R.string.setting_asr_configure_whisper_api_key_desc)) }
+    ) {
+        OutlinedTextField(
+            value = setting.apiKey,
+            onValueChange = { onValueChange(setting.copy(apiKey = it)) },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("sk-...") }
+        )
+    }
+
+    FormItem(
+        label = { Text(stringResource(R.string.setting_asr_configure_base_url)) },
+        description = { Text(stringResource(R.string.setting_asr_configure_whisper_base_url_desc)) }
+    ) {
+        OutlinedTextField(
+            value = setting.baseUrl,
+            onValueChange = { onValueChange(setting.copy(baseUrl = it)) },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("https://api.openai.com/v1") }
+        )
+    }
+
+    FormItem(
+        label = { Text(stringResource(R.string.setting_asr_configure_model)) },
+        description = { Text(stringResource(R.string.setting_asr_configure_whisper_model_desc)) }
+    ) {
+        OutlinedTextField(
+            value = setting.model,
+            onValueChange = { onValueChange(setting.copy(model = it)) },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("whisper-1") }
+        )
+    }
+
+    FormItem(
+        label = { Text(stringResource(R.string.setting_asr_configure_language)) },
+        description = { Text(stringResource(R.string.setting_asr_configure_whisper_language_desc)) }
+    ) {
+        OutlinedTextField(
+            value = setting.language,
+            onValueChange = { onValueChange(setting.copy(language = it)) },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("en") }
+        )
+    }
+
+    FormItem(
+        label = { Text(stringResource(R.string.setting_asr_configure_sample_rate)) },
+        description = { Text(stringResource(R.string.setting_asr_configure_whisper_sample_rate_desc)) }
+    ) {
+        OutlinedNumberInput(
+            value = setting.sampleRate,
+            onValueChange = { value ->
+                if (value in 8000..48000) {
+                    onValueChange(setting.copy(sampleRate = value))
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            label = "Sample Rate"
+        )
+    }
+
+    FormItem(
+        label = { Text(stringResource(R.string.setting_asr_configure_segment_duration)) },
+        description = { Text(stringResource(R.string.setting_asr_configure_whisper_segment_desc)) }
+    ) {
+        OutlinedNumberInput(
+            value = setting.segmentDurationSec,
+            onValueChange = { value ->
+                if (value in 0..300) {
+                    onValueChange(setting.copy(segmentDurationSec = value))
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            label = "Segment Duration (s)"
         )
     }
 }

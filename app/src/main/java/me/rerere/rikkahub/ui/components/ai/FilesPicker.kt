@@ -125,11 +125,9 @@ internal fun FilesPicker(
 
             ImagePickButton(onClick = onPickImage)
 
-            if (provider != null && provider is ProviderSetting.Google) {
-                VideoPickButton(onClick = onPickVideo)
+            VideoPickButton(onClick = onPickVideo)
 
-                AudioPickButton(onClick = onPickAudio)
-            }
+            AudioPickButton(onClick = onPickAudio)
 
             FilePickButton(onClick = onPickFile)
         }

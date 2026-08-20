@@ -15,6 +15,7 @@ import me.rerere.rikkahub.utils.JsonInstant
 import me.rerere.rikkahub.utils.SoundEffectPlayer
 import me.rerere.rikkahub.utils.UpdateChecker
 import me.rerere.rikkahub.web.WebServerManager
+import me.rerere.tts.controller.TtsSynthesizer
 import me.rerere.tts.provider.TTSManager
 import org.koin.dsl.module
 
@@ -43,6 +44,10 @@ val appModule = module {
 
     single {
         TTSManager(get())
+    }
+
+    single {
+        TtsSynthesizer(get())
     }
 
     single {

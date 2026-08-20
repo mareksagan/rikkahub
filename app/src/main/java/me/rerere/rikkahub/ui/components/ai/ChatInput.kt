@@ -85,6 +85,7 @@ import kotlinx.coroutines.flow.collectLatest
 import me.rerere.ai.provider.Model
 import me.rerere.ai.provider.ModelAbility
 import me.rerere.ai.provider.ModelType
+import me.rerere.ai.ui.UIMessagePart
 import me.rerere.asr.ASRStatus
 import me.rerere.hugeicons.HugeIcons
 import me.rerere.hugeicons.stroke.Add01
@@ -133,6 +134,7 @@ fun ChatInput(
     onCancelClick: () -> Unit,
     onSendClick: () -> Unit,
     onLongSendClick: () -> Unit,
+    onTranscribe: ((UIMessagePart) -> Unit)? = null,
 ) {
     val toaster = LocalToaster.current
     val assistant = settings.getCurrentAssistant()
@@ -230,7 +232,11 @@ fun ChatInput(
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     if (state.messageContent.isNotEmpty()) {
-                        MediaFileInputRow(state = state)
+                        MediaFileInputRow(
+                            state = state,
+                            onTranscribe = onTranscribe,
+                            isTranscribing = state.transcribingPart != null,
+                        )
                     }
 
                     TextInputRow(

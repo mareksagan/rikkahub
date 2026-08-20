@@ -53,11 +53,15 @@ import androidx.core.net.toUri
 import com.dokar.sonner.ToastType
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.rerere.ai.provider.BuiltInTools
 import me.rerere.ai.provider.Model
 import me.rerere.ai.ui.UIMessagePart
+import me.rerere.asr.ASRProviderSetting
+import me.rerere.asr.providers.WhisperASRController
 import me.rerere.common.android.appTempFolder
 import me.rerere.hugeicons.HugeIcons
 import me.rerere.hugeicons.stroke.Cancel01
@@ -69,6 +73,7 @@ import me.rerere.rikkahub.data.datastore.Settings
 import me.rerere.rikkahub.data.datastore.findProvider
 import me.rerere.rikkahub.data.datastore.getCurrentAssistant
 import me.rerere.rikkahub.data.datastore.getCurrentChatModel
+import me.rerere.rikkahub.data.datastore.getSelectedASRProvider
 import me.rerere.rikkahub.data.files.FilesManager
 import me.rerere.rikkahub.data.model.Assistant
 import me.rerere.rikkahub.data.model.Conversation
@@ -95,6 +100,7 @@ import me.rerere.rikkahub.utils.navigateToChatPage
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
+import okhttp3.OkHttpClient
 import java.io.File
 import kotlin.uuid.Uuid
 
@@ -280,7 +286,9 @@ private fun ChatPageContent(
 ) {
     val scope = rememberCoroutineScope()
     val toaster = LocalToaster.current
+    val context = LocalContext.current
     val workspaceRepository: WorkspaceRepository = koinInject()
+    val httpClient: OkHttpClient = koinInject()
     var previewMode by rememberSaveable { mutableStateOf(false) }
     val hazeState = rememberHazeState()
     val assistant = setting.getCurrentAssistant()
@@ -422,6 +430,45 @@ private fun ChatPageContent(
                     },
                     onMoreClick = {
                         showFilesSheet = true
+                    },
+                    onTranscribe = { part ->
+                        val url = when (part) {
+                            is UIMessagePart.Audio -> part.url
+                            is UIMessagePart.Video -> part.url
+                            else -> return@ChatInput
+                        }
+                        val asrProvider = setting.getSelectedASRProvider()
+                        if (asrProvider !is ASRProviderSetting.Whisper) {
+                            toaster.show("Transcription requires Whisper ASR provider", type = ToastType.Error)
+                            return@ChatInput
+                        }
+                        scope.launch {
+                            inputState.transcribingPart = part
+                            try {
+                                val uri = url.toUri()
+                                val fileName = uri.lastPathSegment ?: "audio.wav"
+                                val audioBytes = withContext(Dispatchers.IO) {
+                                    context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                                } ?: throw Exception("Cannot read file")
+                                val text = WhisperASRController.transcribeFile(
+                                    httpClient = httpClient,
+                                    baseUrl = asrProvider.baseUrl,
+                                    apiKey = asrProvider.apiKey,
+                                    model = asrProvider.model,
+                                    language = asrProvider.language,
+                                    audioBytes = audioBytes,
+                                    fileName = fileName,
+                                )
+                                if (text.isNotBlank()) {
+                                    inputState.appendText(text)
+                                }
+                            } catch (e: Exception) {
+                                Log.e("ChatPage", "Transcription failed", e)
+                                toaster.show("Transcription failed: ${e.message}", type = ToastType.Error)
+                            } finally {
+                                inputState.transcribingPart = null
+                            }
+                        }
                     },
                 )
             },

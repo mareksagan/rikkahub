@@ -289,6 +289,7 @@
   <string name="chat_page_menu_ai_translator">AI Translator</string>
   <string name="chat_page_menu_image_generation">Image Generation</string>
   <string name="chat_page_menu_speech">Speech</string>
+  <string name="chat_page_menu_tts_generator">TTS Generator</string>
   <string name="chat_page_message_count">%d messages</string>
   <string name="chat_page_move_to_assistant">Move to Assistant</string>
   <string name="chat_page_new_chat">New Chat</string>
@@ -1310,4 +1311,13 @@
   <string name="setting_update_reminder_pause_description">Choose how long to pause update reminders. They will resume automatically.</string>
   <string name="setting_update_reminder_pause_days">%1$d days</string>
   <string name="setting_update_reminder_resume_now">Resume now</string>
+  <string name="tts_generator_page_title">TTS Generator</string>
+  <string name="tts_generator_text_hint">Enter text to convert to speech</string>
+  <string name="tts_generator_provider">Provider</string>
+  <string name="tts_generator_voice">Voice</string>
+  <string name="tts_generator_generate">Generate</string>
+  <string name="tts_generator_generating">Generating...</string>
+  <string name="tts_generator_audio_ready">Audio Ready</string>
+  <string name="tts_generator_save">Save</string>
+  <string name="tts_generator_share">Share</string>
 </resources>

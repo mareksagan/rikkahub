@@ -248,6 +248,77 @@ class WhisperASRController(
 
     companion object {
         /**
+         * Transcribe an audio/video file using the Whisper API.
+         *
+         * Accepts arbitrary audio formats (MP3, WAV, M4A, WEBM, etc.) — no PCM conversion needed.
+         * The Whisper API handles format detection automatically.
+         *
+         * @param httpClient OkHttp client for making the request
+         * @param baseUrl API base URL (e.g., "https://api.openai.com/v1")
+         * @param apiKey API key for authentication
+         * @param model Whisper model to use (e.g., "whisper-1", "whisper-large-v3-turbo")
+         * @param language Optional language code (e.g., "en", "zh"). Empty string = auto-detect
+         * @param audioBytes Raw audio/video file bytes
+         * @param fileName Original file name (used for MIME type hint in the request)
+         * @return Transcribed text
+         */
+        suspend fun transcribeFile(
+            httpClient: OkHttpClient,
+            baseUrl: String,
+            apiKey: String,
+            model: String,
+            language: String,
+            audioBytes: ByteArray,
+            fileName: String,
+        ): String = withContext(Dispatchers.IO) {
+            val mimeType = when {
+                fileName.endsWith(".mp3", true) -> "audio/mpeg"
+                fileName.endsWith(".wav", true) -> "audio/wav"
+                fileName.endsWith(".m4a", true) -> "audio/mp4"
+                fileName.endsWith(".ogg", true) -> "audio/ogg"
+                fileName.endsWith(".flac", true) -> "audio/flac"
+                fileName.endsWith(".webm", true) -> "audio/webm"
+                fileName.endsWith(".mp4", true) -> "video/mp4"
+                fileName.endsWith(".mov", true) -> "video/quicktime"
+                fileName.endsWith(".avi", true) -> "video/x-msvideo"
+                fileName.endsWith(".mkv", true) -> "video/x-matroska"
+                else -> "audio/wav"
+            }
+
+            val requestBody = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart(
+                    "file",
+                    fileName,
+                    audioBytes.toRequestBody(mimeType.toMediaType())
+                )
+                .addFormDataPart("model", model)
+                .apply {
+                    if (language.isNotBlank()) {
+                        addFormDataPart("language", language)
+                    }
+                }
+                .build()
+
+            val url = "${baseUrl.trimEnd('/')}/audio/transcriptions"
+            val request = Request.Builder()
+                .url(url)
+                .addHeader("Authorization", "Bearer $apiKey")
+                .post(requestBody)
+                .build()
+
+            val response = httpClient.newCall(request).execute()
+            if (!response.isSuccessful) {
+                val errorBody = response.body?.string() ?: "Unknown error"
+                throw IOException("Transcription failed: ${response.code} $errorBody")
+            }
+
+            val body = response.body?.string() ?: ""
+            val json = JSONObject(body)
+            json.optString("text", "")
+        }
+
+        /**
          * Convert raw PCM to WAV format.
          */
         fun pcmToWav(

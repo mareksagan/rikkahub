@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -36,6 +37,7 @@ import coil3.compose.AsyncImage
 import me.rerere.ai.ui.UIMessagePart
 import me.rerere.hugeicons.HugeIcons
 import me.rerere.hugeicons.stroke.Cancel01
+import me.rerere.hugeicons.stroke.File02
 import me.rerere.hugeicons.stroke.Files02
 import me.rerere.hugeicons.stroke.MusicNote03
 import me.rerere.hugeicons.stroke.Video01
@@ -46,6 +48,8 @@ import org.koin.compose.koinInject
 @Composable
 internal fun MediaFileInputRow(
     state: ChatInputState,
+    onTranscribe: ((UIMessagePart) -> Unit)? = null,
+    isTranscribing: Boolean = false,
 ) {
     val filesManager: FilesManager = koinInject()
     val managedFiles by filesManager.observe().collectAsState(initial = emptyList())
@@ -107,7 +111,9 @@ internal fun MediaFileInputRow(
                             displayNameByFileName = displayNameByFileName
                         ),
                         leading = { AttachmentLeadingIcon(icon = HugeIcons.Video01) },
-                        onRemove = { removePart(part, part.url) }
+                        onRemove = { removePart(part, part.url) },
+                        onTranscribe = onTranscribe?.let { { it(part) } },
+                        isTranscribing = isTranscribing,
                     )
                 }
 
@@ -120,7 +126,9 @@ internal fun MediaFileInputRow(
                             displayNameByFileName = displayNameByFileName
                         ),
                         leading = { AttachmentLeadingIcon(icon = HugeIcons.MusicNote03) },
-                        onRemove = { removePart(part, part.url) }
+                        onRemove = { removePart(part, part.url) },
+                        onTranscribe = onTranscribe?.let { { it(part) } },
+                        isTranscribing = isTranscribing,
                     )
                 }
 
@@ -148,6 +156,8 @@ private fun AttachmentChip(
     title: String,
     leading: @Composable () -> Unit,
     onRemove: () -> Unit,
+    onTranscribe: (() -> Unit)? = null,
+    isTranscribing: Boolean = false,
 ) {
     Surface(
         shape = RoundedCornerShape(18.dp),
@@ -171,6 +181,29 @@ private fun AttachmentChip(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.widthIn(min = 40.dp, max = 180.dp),
             )
+            if (onTranscribe != null) {
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .size(26.dp)
+                        .clickable(enabled = !isTranscribing, onClick = onTranscribe),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (isTranscribing) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                        )
+                    } else {
+                        Icon(
+                            imageVector = HugeIcons.File02,
+                            contentDescription = "Transcribe",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
             Box(
                 modifier = Modifier
                     .clip(CircleShape)

@@ -386,6 +386,14 @@ fun ChatDrawerContent(
                                 navController.navigate(Screen.SettingSpeech)
                             }
                         )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.chat_page_menu_tts_generator)) },
+                            leadingIcon = { Icon(HugeIcons.Mic01, null) },
+                            onClick = {
+                                showMenuPopup = false
+                                navController.navigate(Screen.TTSGenerator)
+                            }
+                        )
                     }
                 }
 

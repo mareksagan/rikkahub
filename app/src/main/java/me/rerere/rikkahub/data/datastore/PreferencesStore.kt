@@ -276,10 +276,17 @@ class SettingsStore(
                     ttsProviders.add(defaultTTSProvider.copyProvider())
                 }
             }
+            val asrProviders = it.asrProviders.ifEmpty { DEFAULT_ASR_PROVIDERS }.toMutableList()
+            DEFAULT_ASR_PROVIDERS.forEach { defaultASRProvider ->
+                if (asrProviders.none { provider -> provider.id == defaultASRProvider.id }) {
+                    asrProviders.add(defaultASRProvider.copyProvider())
+                }
+            }
             it.copy(
                 providers = providers,
                 assistants = assistants,
                 ttsProviders = ttsProviders,
+                asrProviders = asrProviders,
             )
         }
         .map { settings ->
@@ -544,7 +551,7 @@ data class Settings(
     val ttsProviders: List<TTSProviderSetting> = DEFAULT_TTS_PROVIDERS,
     val selectedTTSProviderId: Uuid = DEFAULT_SYSTEM_TTS_ID,
     val defaultTTSPlaybackSpeed: Float = 1.0f,
-    val asrProviders: List<ASRProviderSetting> = emptyList(),
+    val asrProviders: List<ASRProviderSetting> = DEFAULT_ASR_PROVIDERS,
     val selectedASRProviderId: Uuid? = null,
     val modeInjections: List<PromptInjection.ModeInjection> = DEFAULT_MODE_INJECTIONS,
     val lorebooks: List<Lorebook> = emptyList(),
@@ -767,6 +774,19 @@ private val DEFAULT_TTS_PROVIDERS = listOf(
         baseUrl = "https://aihubmix.com/v1",
         model = "gpt-4o-mini-tts",
         voice = "alloy",
+    )
+)
+
+private val DEFAULT_ASR_PROVIDERS = listOf(
+    ASRProviderSetting.Whisper(
+        id = Uuid.parse("f47ac10b-58cc-4372-a567-0e02b2c3d479"),
+        name = "OVH AI Whisper",
+        baseUrl = "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1",
+        apiKey = "",
+        model = "whisper-large-v3-turbo",
+        language = "",
+        sampleRate = 16000,
+        segmentDurationSec = 30,
     )
 )
 
